@@ -3,7 +3,7 @@ name: Build Finance APK
 on:
   push:
     branches:
-      - principal
+      - main
   workflow_dispatch:
 
 jobs:
