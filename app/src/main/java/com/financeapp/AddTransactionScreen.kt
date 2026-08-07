@@ -2,6 +2,7 @@ package com.financeapp
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +35,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionScreen(
-    onBack: () -> Unit
+    bottomPadding: PaddingValues
 ) {
     val context = LocalContext.current
 
@@ -65,7 +66,7 @@ fun AddTransactionScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = {}
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -81,6 +82,7 @@ fun AddTransactionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .padding(bottomPadding)
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -176,6 +178,7 @@ fun AddTransactionScreen(
                         .toDoubleOrNull()
 
                     when {
+
                         normalizedAmount == null ||
                             normalizedAmount <= 0 -> {
 
@@ -208,14 +211,5 @@ fun AddTransactionScreen(
                                 transaction = transaction
                             )
 
-                            onBack()
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Salvar movimentação")
-            }
-        }
-    }
-}
+                            amount = ""
+                           

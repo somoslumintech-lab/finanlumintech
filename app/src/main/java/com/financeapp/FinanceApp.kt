@@ -1,50 +1,125 @@
 package com.financeapp
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun FinanceApp() {
 
-    val navController = rememberNavController()
+    var currentScreen by remember {
+        mutableStateOf("home")
+    }
 
-    NavHost(
-        navController = navController,
-        startDestination = "home"
-    ) {
+    Scaffold(
+        bottomBar = {
 
-        composable("home") {
-            HomeScreen(
-                onNavigate = { route ->
-                    navController.navigate(route)
-                }
-            )
+            NavigationBar {
+
+                NavigationBarItem(
+                    selected = currentScreen == "home",
+                    onClick = {
+                        currentScreen = "home"
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Default.Home,
+                            contentDescription = "Início"
+                        )
+                    },
+                    label = {
+                        Text("Início")
+                    }
+                )
+
+                NavigationBarItem(
+                    selected = currentScreen == "analysis",
+                    onClick = {
+                        currentScreen = "analysis"
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Default.Analytics,
+                            contentDescription = "Análise"
+                        )
+                    },
+                    label = {
+                        Text("Análise")
+                    }
+                )
+
+                NavigationBarItem(
+                    selected = currentScreen == "add",
+                    onClick = {
+                        currentScreen = "add"
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Adicionar"
+                        )
+                    },
+                    label = {
+                        Text("Adicionar")
+                    }
+                )
+
+                NavigationBarItem(
+                    selected = currentScreen == "group",
+                    onClick = {
+                        currentScreen = "group"
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Default.People,
+                            contentDescription = "Grupo"
+                        )
+                    },
+                    label = {
+                        Text("Grupo")
+                    }
+                )
+            }
         }
+    ) { padding ->
 
-        composable("analysis") {
-            AnalysisScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
+        when (currentScreen) {
 
-        composable("add") {
-            AddTransactionScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
+            "home" -> {
+                HomeScreen(
+                    bottomPadding = padding
+                )
+            }
 
-        composable("group") {
-            GroupScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+            "analysis" -> {
+                AnalysisScreen(
+                    bottomPadding = padding
+                )
+            }
+
+            "add" -> {
+                AddTransactionScreen(
+                    bottomPadding = padding
+                )
+            }
+
+            "group" -> {
+                GroupScreen(
+                    bottomPadding = padding
+                )
+            }
         }
     }
 }

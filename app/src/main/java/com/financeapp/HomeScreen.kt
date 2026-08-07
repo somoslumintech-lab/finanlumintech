@@ -32,8 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +46,7 @@ import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    onNavigate: (String) -> Unit
+    bottomPadding: PaddingValues
 ) {
     val context = LocalContext.current
 
@@ -90,7 +90,9 @@ fun HomeScreen(
             }
 
             item {
-                BalanceCard(balance)
+                BalanceCard(
+                    balance = balance
+                )
             }
 
             item {
@@ -102,8 +104,8 @@ fun HomeScreen(
 
             item {
                 SectionHeader(
-                    "Gastos por categoria",
-                    "Ver tudo"
+                    title = "Gastos por categoria",
+                    action = "Ver tudo"
                 )
             }
 
@@ -115,8 +117,8 @@ fun HomeScreen(
 
             item {
                 SectionHeader(
-                    "Movimentações recentes",
-                    "Ver tudo"
+                    title = "Movimentações recentes",
+                    action = "Ver tudo"
                 )
             }
 
@@ -129,12 +131,12 @@ fun HomeScreen(
             } else {
 
                 items(
-                    transactions.take(10),
+                    items = transactions.take(10),
                     key = { it.id }
                 ) { transaction ->
 
                     TransactionItem(
-                        transaction
+                        transaction = transaction
                     )
                 }
             }
@@ -180,7 +182,7 @@ private fun HomeHeader() {
             onClick = {}
         ) {
             Icon(
-                Icons.Default.NotificationsNone,
+                imageVector = Icons.Default.NotificationsNone,
                 contentDescription = "Notificações"
             )
         }
@@ -205,7 +207,7 @@ private fun BalanceCard(
         ) {
 
             Text(
-                "Saldo disponível",
+                text = "Saldo disponível",
                 color = MaterialTheme.colorScheme.onPrimary.copy(
                     alpha = 0.75f
                 ),
@@ -213,18 +215,18 @@ private fun BalanceCard(
             )
 
             Spacer(
-                Modifier.height(8.dp)
+                modifier = Modifier.height(8.dp)
             )
 
             Text(
-                formatCurrency(balance),
+                text = formatCurrency(balance),
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Spacer(
-                Modifier.height(16.dp)
+                modifier = Modifier.height(16.dp)
             )
 
             Row(
@@ -232,18 +234,18 @@ private fun BalanceCard(
             ) {
 
                 Icon(
-                    Icons.Default.TrendingUp,
+                    imageVector = Icons.Default.TrendingUp,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(18.dp)
                 )
 
                 Spacer(
-                    Modifier.width(6.dp)
+                    modifier = Modifier.width(6.dp)
                 )
 
                 Text(
-                    "Saldo atual",
+                    text = "Saldo atual",
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Medium
                 )
@@ -264,17 +266,17 @@ private fun FinancialSummary(
     ) {
 
         SummaryCard(
-            Modifier.weight(1f),
-            "Entradas",
-            formatCurrency(income),
-            "+"
+            modifier = Modifier.weight(1f),
+            title = "Entradas",
+            value = formatCurrency(income),
+            symbol = "+"
         )
 
         SummaryCard(
-            Modifier.weight(1f),
-            "Saídas",
-            formatCurrency(expenses),
-            "-"
+            modifier = Modifier.weight(1f),
+            title = "Saídas",
+            value = formatCurrency(expenses),
+            symbol = "-"
         )
     }
 }
@@ -293,21 +295,21 @@ private fun SummaryCard(
     ) {
 
         Column(
-            Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
 
             Text(
-                title,
+                text = title,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
 
             Spacer(
-                Modifier.height(6.dp)
+                modifier = Modifier.height(6.dp)
             )
 
             Text(
-                "$symbol $value",
+                text = "$symbol $value",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -328,13 +330,232 @@ private fun SectionHeader(
     ) {
 
         Text(
-            title,
+            text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            action,
+            text = action,
             color = MaterialTheme.colorScheme.primary,
             fontSize = 13.sp,
-            fontWeight = FontWeight
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun CategoryList(
+    transactions: List<Transaction>
+) {
+
+    val expenses = transactions.filter {
+        it.type == TransactionType.EXPENSE
+    }
+
+    if (expenses.isEmpty()) {
+
+        Text(
+            text = "Nenhum gasto registrado ainda.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        return
+    }
+
+    val categories = expenses
+        .groupBy { it.category }
+        .mapValues { (_, items) ->
+            items.sumOf { it.amount }
+        }
+        .toList()
+        .sortedByDescending { it.second }
+
+    val total = expenses.sumOf {
+        it.amount
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+
+        categories.take(5).forEach { (name, value) ->
+
+            val progress =
+                if (total > 0) {
+                    (value / total).toFloat()
+                } else {
+                    0f
+                }
+
+            CategoryItem(
+                name = name,
+                value = formatCurrency(value),
+                progress = progress
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryItem(
+    name: String,
+    value: String,
+    progress: Float
+) {
+
+    Column {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Text(
+                text = name
+            )
+
+            Text(
+                text = value,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(7.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant
+                )
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primary
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyTransactions() {
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Nenhuma movimentação ainda",
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+            Text(
+                text = "Adicione sua primeira movimentação.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun TransactionItem(
+    transaction: Transaction
+) {
+
+    val icon = if (
+        transaction.type == TransactionType.INCOME
+    ) {
+        "💰"
+    } else {
+        "💸"
+    }
+
+    val amountPrefix = if (
+        transaction.type == TransactionType.INCOME
+    ) {
+        "+"
+    } else {
+        "-"
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Surface(
+            modifier = Modifier.size(46.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+
+                Text(
+                    text = icon,
+                    fontSize = 20.sp
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.width(12.dp)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+
+            Text(
+                text = transaction.description,
+                fontWeight = FontWeight.Medium
+            )
+
+            Text(
+                text = transaction.category,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp
+            )
+        }
+
+        Text(
+            text = "$amountPrefix ${formatCurrency(transaction.amount)}",
+            fontWeight = FontWeight.SemiBold,
+            color = if (
+                transaction.type == TransactionType.INCOME
+            ) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            }
+        )
+    }
+}
