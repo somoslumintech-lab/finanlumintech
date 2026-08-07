@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.sp
 fun AddTransactionScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
 
     var amount by remember {
         mutableStateOf("")
@@ -46,6 +48,10 @@ fun AddTransactionScreen(
 
     var isIncome by remember {
         mutableStateOf(false)
+    }
+
+    var errorMessage by remember {
+        mutableStateOf("")
     }
 
     Scaffold(
@@ -93,6 +99,7 @@ fun AddTransactionScreen(
                 value = amount,
                 onValueChange = {
                     amount = it
+                    errorMessage = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
                 label = {
@@ -136,6 +143,7 @@ fun AddTransactionScreen(
                 value = description,
                 onValueChange = {
                     description = it
+                    errorMessage = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
                 label = {
@@ -147,13 +155,62 @@ fun AddTransactionScreen(
                 singleLine = true
             )
 
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage
+                )
+            }
+
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
 
             Button(
                 onClick = {
-                    // Futuramente salvará no Supabase.
+
+                    val normalizedAmount = amount
+                        .replace("R$", "")
+                        .replace(" ", "")
+                        .replace(".", "")
+                        .replace(",", ".")
+                        .toDoubleOrNull()
+
+                    when {
+                        normalizedAmount == null ||
+                            normalizedAmount <= 0 -> {
+
+                            errorMessage =
+                                "Digite um valor válido."
+                        }
+
+                        description.isBlank() -> {
+
+                            errorMessage =
+                                "Digite uma descrição."
+                        }
+
+                        else -> {
+
+                            val transaction =
+                                Transaction(
+                                    id = System.currentTimeMillis(),
+                                    type = if (isIncome) {
+                                        TransactionType.INCOME
+                                    } else {
+                                        TransactionType.EXPENSE
+                                    },
+                                    amount = normalizedAmount,
+                                    description = description.trim()
+                                )
+
+                            FinanceStore.addTransaction(
+                                context = context,
+                                transaction = transaction
+                            )
+
+                            onBack()
+                        }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
