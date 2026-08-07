@@ -35,7 +35,8 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionScreen(
-    bottomPadding: PaddingValues
+    bottomPadding: PaddingValues,
+    onBack: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -66,7 +67,7 @@ fun AddTransactionScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {}
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,

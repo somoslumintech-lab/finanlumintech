@@ -114,13 +114,19 @@ fun FinanceApp() {
 
             "add" -> {
                 AddTransactionScreen(
-                    bottomPadding = padding
+                    bottomPadding = padding,
+                    onBack = {
+                      currentScreen = "home"
+                      }
                 )
             }
 
             "group" -> {
                 GroupScreen(
-                    bottomPadding = padding
+                    bottomPadding = padding,
+                    onBack = { 
+                      currentScreen = "home"
+                      }
                 )
             }
         }
