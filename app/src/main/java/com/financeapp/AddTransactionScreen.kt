@@ -34,6 +34,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,31 +182,53 @@ fun AddTransactionScreen(
                 singleLine = true
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            ExposedDropdownMenuBox(
+    expanded = categoryExpanded,
+    onExpandedChange = {
+        categoryExpanded = !categoryExpanded
+    },
+    modifier = Modifier.fillMaxWidth()
+) {
 
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            categoryExpanded = true
-                        },
-                    label = {
-                        Text("Categoria")
-                    },
-                    readOnly = true,
-                    singleLine = true
-                )
+    OutlinedTextField(
+        value = category,
+        onValueChange = {},
+        modifier = Modifier
+            .fillMaxWidth()
+            .menuAnchor(),
+        label = {
+            Text("Categoria")
+        },
+        readOnly = true,
+        singleLine = true,
+        trailingIcon = {
+            ExposedDropdownMenuDefaults.TrailingIcon(
+                expanded = categoryExpanded
+            )
+        }
+    )
 
-                DropdownMenu(
-                    expanded = categoryExpanded,
-                    onDismissRequest = {
-                        categoryExpanded = false
-                    }
-                ) {
+    ExposedDropdownMenu(
+        expanded = categoryExpanded,
+        onDismissRequest = {
+            categoryExpanded = false
+        }
+    ) {
+
+        categories.forEach { item ->
+
+            DropdownMenuItem(
+                text = {
+                    Text(item)
+                },
+                onClick = {
+                    category = item
+                    categoryExpanded = false
+                }
+            )
+        }
+    }
+}{
 
                     categories.forEach { item ->
 
