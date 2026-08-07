@@ -105,7 +105,10 @@ fun FinanceApp() {
 
             "analysis" -> {
                 AnalysisScreen(
-                    bottomPadding = padding
+                    bottomPadding = padding,
+                    onBack = {
+                        currentScreen = "home"
+                    }
                 )
             }
 

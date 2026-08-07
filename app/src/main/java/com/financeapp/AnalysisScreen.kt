@@ -29,7 +29,8 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalysisScreen(
-    bottomPadding: PaddingValues
+    bottomPadding: PaddingValues,
+    onBack: () -> Unit
 ) {
 
     Scaffold(
@@ -43,7 +44,7 @@ fun AnalysisScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {}
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
