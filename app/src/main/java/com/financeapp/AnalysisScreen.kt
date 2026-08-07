@@ -21,10 +21,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +40,54 @@ fun AnalysisScreen(
     bottomPadding: PaddingValues,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    var transactions by remember {
+        mutableStateOf(
+            FinanceStore.getTransactions(context)
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        transactions = FinanceStore.getTransactions(context)
+    }
+
+    val income = transactions
+        .filter {
+            it.type == TransactionType.INCOME
+        }
+        .sumOf {
+            it.amount
+        }
+
+    val expenses = transactions
+        .filter {
+            it.type == TransactionType.EXPENSE
+        }
+        .sumOf {
+            it.amount
+        }
+
+    val savings = income - expenses
+
+    val expenseCategories = transactions
+        .filter {
+            it.type == TransactionType.EXPENSE
+        }
+        .groupBy {
+            it.category
+        }
+        .mapValues { (_, items) ->
+            items.sumOf {
+                it.amount
+            }
+        }
+        .toList()
+        .sortedByDescending {
+            it.second
+        }
+
+    val totalExpenses = expenses
 
     Scaffold(
         topBar = {
@@ -70,29 +126,29 @@ fun AnalysisScreen(
             )
 
             Text(
-                text = "Resumo do mês",
+                text = "Resumo financeiro",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "Agosto 2026",
+                text = "Dados atuais",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             SummaryAnalysisCard(
                 title = "Entradas",
-                value = "R$ 5.200,00"
+                value = formatAnalysisCurrency(income)
             )
 
             SummaryAnalysisCard(
                 title = "Saídas",
-                value = "R$ 3.180,00"
+                value = formatAnalysisCurrency(expenses)
             )
 
             SummaryAnalysisCard(
                 title = "Economia",
-                value = "R$ 2.020,00"
+                value = formatAnalysisCurrency(savings)
             )
 
             Spacer(
@@ -105,31 +161,47 @@ fun AnalysisScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            AnalysisCategory(
-                name = "Casa",
-                percentage = "29,8%",
-                value = "R$ 950,00"
-            )
+            if (expenseCategories.isEmpty()) {
 
-            AnalysisCategory(
-                name = "Alimentação",
-                percentage = "19,5%",
-                value = "R$ 620,00"
-            )
+                Text(
+                    text = "Nenhum gasto registrado ainda.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-            AnalysisCategory(
-                name = "Transporte",
-                percentage = "12,0%",
-                value = "R$ 380,00"
-            )
+            } else {
 
-            AnalysisCategory(
-                name = "Outros",
-                percentage = "38,7%",
-                value = "R$ 1.230,00"
-            )
+                expenseCategories.forEach { (name, value) ->
+
+                    val percentage =
+                        if (totalExpenses > 0) {
+                            (value / totalExpenses) * 100
+                        } else {
+                            0.0
+                        }
+
+                    AnalysisCategory(
+                        name = name,
+                        percentage = String.format(
+                            Locale("pt", "BR"),
+                            "%.1f%%",
+                            percentage
+                        ),
+                        value = formatAnalysisCurrency(value)
+                    )
+                }
+            }
         }
     }
+}
+
+private fun formatAnalysisCurrency(
+    value: Double
+): String {
+    return NumberFormat
+        .getCurrencyInstance(
+            Locale("pt", "BR")
+        )
+        .format(value)
 }
 
 @Composable
