@@ -1,6 +1,5 @@
 package com.financeapp
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,9 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,9 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,52 +180,37 @@ fun AddTransactionScreen(
             )
 
             ExposedDropdownMenuBox(
-    expanded = categoryExpanded,
-    onExpandedChange = {
-        categoryExpanded = !categoryExpanded
-    },
-    modifier = Modifier.fillMaxWidth()
-) {
-
-    OutlinedTextField(
-        value = category,
-        onValueChange = {},
-        modifier = Modifier
-            .fillMaxWidth()
-            .menuAnchor(),
-        label = {
-            Text("Categoria")
-        },
-        readOnly = true,
-        singleLine = true,
-        trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(
-                expanded = categoryExpanded
-            )
-        }
-    )
-
-    ExposedDropdownMenu(
-        expanded = categoryExpanded,
-        onDismissRequest = {
-            categoryExpanded = false
-        }
-    ) {
-
-        categories.forEach { item ->
-
-            DropdownMenuItem(
-                text = {
-                    Text(item)
+                expanded = categoryExpanded,
+                onExpandedChange = {
+                    categoryExpanded = !categoryExpanded
                 },
-                onClick = {
-                    category = item
-                    categoryExpanded = false
-                }
-            )
-        }
-    }
-}{
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    label = {
+                        Text("Categoria")
+                    },
+                    readOnly = true,
+                    singleLine = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(
+                            expanded = categoryExpanded
+                        )
+                    }
+                )
+
+                ExposedDropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = {
+                        categoryExpanded = false
+                    }
+                ) {
 
                     categories.forEach { item ->
 
