@@ -212,4 +212,15 @@ fun AddTransactionScreen(
                             )
 
                             amount = ""
-                           
+                            description = ""
+                            errorMessage = ""
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Salvar movimentação")
+            }
+        }
+    }
+}
