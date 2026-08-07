@@ -1,5 +1,6 @@
 package com.financeapp
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,9 +55,27 @@ fun AddTransactionScreen(
         mutableStateOf(false)
     }
 
+    var category by remember {
+        mutableStateOf("Outros")
+    }
+
+    var categoryExpanded by remember {
+        mutableStateOf(false)
+    }
+
     var errorMessage by remember {
         mutableStateOf("")
     }
+
+    val categories = listOf(
+        "Casa",
+        "Alimentação",
+        "Transporte",
+        "Saúde",
+        "Lazer",
+        "Salário",
+        "Outros"
+    )
 
     Scaffold(
         topBar = {
@@ -158,6 +179,47 @@ fun AddTransactionScreen(
                 singleLine = true
             )
 
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            categoryExpanded = true
+                        },
+                    label = {
+                        Text("Categoria")
+                    },
+                    readOnly = true,
+                    singleLine = true
+                )
+
+                DropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = {
+                        categoryExpanded = false
+                    }
+                ) {
+
+                    categories.forEach { item ->
+
+                        DropdownMenuItem(
+                            text = {
+                                Text(item)
+                            },
+                            onClick = {
+                                category = item
+                                categoryExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
             if (errorMessage.isNotEmpty()) {
                 Text(
                     text = errorMessage
@@ -204,7 +266,8 @@ fun AddTransactionScreen(
                                         TransactionType.EXPENSE
                                     },
                                     amount = normalizedAmount,
-                                    description = description.trim()
+                                    description = description.trim(),
+                                    category = category
                                 )
 
                             FinanceStore.addTransaction(
@@ -214,6 +277,8 @@ fun AddTransactionScreen(
 
                             amount = ""
                             description = ""
+                            category = "Outros"
+                            categoryExpanded = false
                             errorMessage = ""
                         }
                     }
