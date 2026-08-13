@@ -174,7 +174,7 @@ fun HomeScreen(
                     if (showAllTransactions) {
                         transactions
                     } else {
-                        transactions.take(10)
+                        transactions.take(5)
                     }
 
                 items(
@@ -489,7 +489,7 @@ private fun CategoryList(
         if (showAll) {
             categories
         } else {
-            categories.take(5)
+            categories.take(3)
         }
 
     Column(
