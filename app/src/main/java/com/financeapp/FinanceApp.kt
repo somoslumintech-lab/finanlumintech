@@ -23,6 +23,10 @@ fun FinanceApp() {
         mutableStateOf("home")
     }
 
+    var selectedTransaction by remember {
+        mutableStateOf<Transaction?>(null)
+    }
+
     Scaffold(
         bottomBar = {
 
@@ -98,12 +102,19 @@ fun FinanceApp() {
         when (currentScreen) {
 
             "home" -> {
+
                 HomeScreen(
-                    bottomPadding = padding
+                    bottomPadding = padding,
+                    onEdit = { transaction ->
+
+                        selectedTransaction = transaction
+                        currentScreen = "edit"
+                    }
                 )
             }
 
             "analysis" -> {
+
                 AnalysisScreen(
                     bottomPadding = padding,
                     onBack = {
@@ -113,21 +124,41 @@ fun FinanceApp() {
             }
 
             "add" -> {
+
                 AddTransactionScreen(
                     bottomPadding = padding,
                     onBack = {
-                      currentScreen = "home"
-                      }
+                        currentScreen = "home"
+                    }
                 )
             }
 
             "group" -> {
+
                 GroupScreen(
                     bottomPadding = padding,
-                    onBack = { 
-                      currentScreen = "home"
-                      }
+                    onBack = {
+                        currentScreen = "home"
+                    }
                 )
+            }
+
+            "edit" -> {
+
+                selectedTransaction?.let { transaction ->
+
+                    EditTransactionScreen(
+                        bottomPadding = padding,
+                        transaction = transaction,
+                        onBack = {
+                            selectedTransaction = null
+                            currentScreen = "home"
+                        }
+                    )
+                } ?: run {
+
+                    currentScreen = "home"
+                }
             }
         }
     }

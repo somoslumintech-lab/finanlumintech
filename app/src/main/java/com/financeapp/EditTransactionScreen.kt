@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTransactionScreen(
     bottomPadding: PaddingValues,
@@ -187,37 +183,36 @@ fun EditTransactionScreen(
                 singleLine = true
             )
 
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = {
-                    categoryExpanded = !categoryExpanded
-                },
+            Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
 
                 OutlinedTextField(
                     value = category,
                     onValueChange = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
+                    modifier = Modifier.fillMaxWidth(),
                     label = {
                         Text("Categoria")
                     },
                     readOnly = true,
                     singleLine = true,
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = categoryExpanded
+                        Text(
+                            text = if (categoryExpanded) {
+                                "▲"
+                            } else {
+                                "▼"
+                            }
                         )
                     }
                 )
 
-                ExposedDropdownMenu(
+                DropdownMenu(
                     expanded = categoryExpanded,
                     onDismissRequest = {
                         categoryExpanded = false
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
 
                     categories.forEach { item ->
@@ -233,6 +228,19 @@ fun EditTransactionScreen(
                         )
                     }
                 }
+            }
+
+            Spacer(
+                modifier = Modifier.height(1.dp)
+            )
+
+            Button(
+                onClick = {
+                    categoryExpanded = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Selecionar categoria")
             }
 
             if (errorMessage.isNotEmpty()) {
