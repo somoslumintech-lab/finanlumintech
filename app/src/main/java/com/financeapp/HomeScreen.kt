@@ -1,6 +1,7 @@
 package com.financeapp
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -28,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,6 +58,10 @@ fun HomeScreen(
         mutableStateOf(
             FinanceStore.getTransactions(context)
         )
+    }
+
+    var transactionToDelete by remember {
+        mutableStateOf<Transaction?>(null)
     }
 
     LaunchedEffect(Unit) {
@@ -136,11 +144,60 @@ fun HomeScreen(
                 ) { transaction ->
 
                     TransactionItem(
-                        transaction = transaction
+                        transaction = transaction,
+                        onDelete = {
+                            transactionToDelete = transaction
+                        }
                     )
                 }
             }
         }
+    }
+
+    transactionToDelete?.let { transaction ->
+
+        AlertDialog(
+            onDismissRequest = {
+                transactionToDelete = null
+            },
+            title = {
+                Text("Excluir movimentação?")
+            },
+            text = {
+                Text(
+                    "A movimentação \"${transaction.description}\" será excluída permanentemente."
+                )
+            },
+            confirmButton = {
+
+                TextButton(
+                    onClick = {
+
+                        FinanceStore.deleteTransaction(
+                            context = context,
+                            transactionId = transaction.id
+                        )
+
+                        transactions =
+                            FinanceStore.getTransactions(context)
+
+                        transactionToDelete = null
+                    }
+                ) {
+                    Text("Excluir")
+                }
+            },
+            dismissButton = {
+
+                TextButton(
+                    onClick = {
+                        transactionToDelete = null
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -437,7 +494,9 @@ private fun CategoryItem(
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                    .fillMaxWidth(
+                        progress.coerceIn(0f, 1f)
+                    )
                     .height(8.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
@@ -485,7 +544,8 @@ private fun EmptyTransactions() {
 
 @Composable
 private fun TransactionItem(
-    transaction: Transaction
+    transaction: Transaction,
+    onDelete: () -> Unit
 ) {
 
     val icon = if (
@@ -505,7 +565,12 @@ private fun TransactionItem(
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onDelete()
+            }
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -557,5 +622,14 @@ private fun TransactionItem(
                 MaterialTheme.colorScheme.onSurface
             }
         )
+
+        IconButton(
+            onClick = onDelete
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Excluir movimentação"
+            )
+        }
     }
 }

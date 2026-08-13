@@ -15,12 +15,17 @@ object FinanceStore {
             Context.MODE_PRIVATE
         )
 
-        val json = prefs.getString(TRANSACTIONS_KEY, "[]") ?: "[]"
+        val json = prefs.getString(
+            TRANSACTIONS_KEY,
+            "[]"
+        ) ?: "[]"
+
         val array = JSONArray(json)
 
         val transactions = mutableListOf<Transaction>()
 
         for (i in 0 until array.length()) {
+
             val item = array.getJSONObject(i)
 
             transactions.add(
@@ -52,9 +57,29 @@ object FinanceStore {
         context: Context,
         transaction: Transaction
     ) {
-        val transactions = getTransactions(context).toMutableList()
+        val transactions = getTransactions(
+            context
+        ).toMutableList()
 
         transactions.add(transaction)
+
+        saveTransactions(
+            context,
+            transactions
+        )
+    }
+
+    fun deleteTransaction(
+        context: Context,
+        transactionId: Long
+    ) {
+        val transactions = getTransactions(
+            context
+        ).toMutableList()
+
+        transactions.removeAll {
+            it.id == transactionId
+        }
 
         saveTransactions(
             context,
@@ -72,12 +97,35 @@ object FinanceStore {
 
             val item = JSONObject()
 
-            item.put("id", transaction.id)
-            item.put("type", transaction.type.name)
-            item.put("amount", transaction.amount)
-            item.put("description", transaction.description)
-            item.put("category", transaction.category)
-            item.put("date", transaction.date)
+            item.put(
+                "id",
+                transaction.id
+            )
+
+            item.put(
+                "type",
+                transaction.type.name
+            )
+
+            item.put(
+                "amount",
+                transaction.amount
+            )
+
+            item.put(
+                "description",
+                transaction.description
+            )
+
+            item.put(
+                "category",
+                transaction.category
+            )
+
+            item.put(
+                "date",
+                transaction.date
+            )
 
             array.put(item)
         }
