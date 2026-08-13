@@ -1,6 +1,7 @@
 package com.financeapp
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.clickable
 
 @Composable
 fun EditTransactionScreen(
@@ -183,7 +185,7 @@ fun EditTransactionScreen(
                 singleLine = true
             )
 
-            Column(
+            Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
 
@@ -195,24 +197,22 @@ fun EditTransactionScreen(
                         Text("Categoria")
                     },
                     readOnly = true,
-                    singleLine = true,
-                    trailingIcon = {
-                        Text(
-                            text = if (categoryExpanded) {
-                                "▲"
-                            } else {
-                                "▼"
-                            }
-                        )
-                    }
+                    singleLine = true
+                )
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable {
+                            categoryExpanded = true
+                        }
                 )
 
                 DropdownMenu(
                     expanded = categoryExpanded,
                     onDismissRequest = {
                         categoryExpanded = false
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 ) {
 
                     categories.forEach { item ->
@@ -228,19 +228,6 @@ fun EditTransactionScreen(
                         )
                     }
                 }
-            }
-
-            Spacer(
-                modifier = Modifier.height(1.dp)
-            )
-
-            Button(
-                onClick = {
-                    categoryExpanded = true
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Selecionar categoria")
             }
 
             if (errorMessage.isNotEmpty()) {

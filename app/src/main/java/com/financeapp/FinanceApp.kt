@@ -23,7 +23,7 @@ fun FinanceApp() {
         mutableStateOf("home")
     }
 
-    var selectedTransaction by remember {
+    var transactionToEdit by remember {
         mutableStateOf<Transaction?>(null)
     }
 
@@ -36,6 +36,7 @@ fun FinanceApp() {
                     selected = currentScreen == "home",
                     onClick = {
                         currentScreen = "home"
+                        transactionToEdit = null
                     },
                     icon = {
                         Icon(
@@ -52,6 +53,7 @@ fun FinanceApp() {
                     selected = currentScreen == "analysis",
                     onClick = {
                         currentScreen = "analysis"
+                        transactionToEdit = null
                     },
                     icon = {
                         Icon(
@@ -68,6 +70,7 @@ fun FinanceApp() {
                     selected = currentScreen == "add",
                     onClick = {
                         currentScreen = "add"
+                        transactionToEdit = null
                     },
                     icon = {
                         Icon(
@@ -84,6 +87,7 @@ fun FinanceApp() {
                     selected = currentScreen == "group",
                     onClick = {
                         currentScreen = "group"
+                        transactionToEdit = null
                     },
                     icon = {
                         Icon(
@@ -99,65 +103,55 @@ fun FinanceApp() {
         }
     ) { padding ->
 
-        when (currentScreen) {
+        if (transactionToEdit != null) {
 
-            "home" -> {
+            EditTransactionScreen(
+                bottomPadding = padding,
+                transaction = transactionToEdit!!,
+                onBack = {
+                    transactionToEdit = null
+                    currentScreen = "home"
+                }
+            )
 
-                HomeScreen(
-                    bottomPadding = padding,
-                    onEdit = { transaction ->
+        } else {
 
-                        selectedTransaction = transaction
-                        currentScreen = "edit"
-                    }
-                )
-            }
+            when (currentScreen) {
 
-            "analysis" -> {
-
-                AnalysisScreen(
-                    bottomPadding = padding,
-                    onBack = {
-                        currentScreen = "home"
-                    }
-                )
-            }
-
-            "add" -> {
-
-                AddTransactionScreen(
-                    bottomPadding = padding,
-                    onBack = {
-                        currentScreen = "home"
-                    }
-                )
-            }
-
-            "group" -> {
-
-                GroupScreen(
-                    bottomPadding = padding,
-                    onBack = {
-                        currentScreen = "home"
-                    }
-                )
-            }
-
-            "edit" -> {
-
-                selectedTransaction?.let { transaction ->
-
-                    EditTransactionScreen(
+                "home" -> {
+                    HomeScreen(
                         bottomPadding = padding,
-                        transaction = transaction,
+                        onEdit = { transaction ->
+                            transactionToEdit = transaction
+                        }
+                    )
+                }
+
+                "analysis" -> {
+                    AnalysisScreen(
+                        bottomPadding = padding,
                         onBack = {
-                            selectedTransaction = null
                             currentScreen = "home"
                         }
                     )
-                } ?: run {
+                }
 
-                    currentScreen = "home"
+                "add" -> {
+                    AddTransactionScreen(
+                        bottomPadding = padding,
+                        onBack = {
+                            currentScreen = "home"
+                        }
+                    )
+                }
+
+                "group" -> {
+                    GroupScreen(
+                        bottomPadding = padding,
+                        onBack = {
+                            currentScreen = "home"
+                        }
+                    )
                 }
             }
         }
