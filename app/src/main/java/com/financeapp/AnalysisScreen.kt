@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -16,6 +18,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -181,11 +184,7 @@ fun AnalysisScreen(
 
                     AnalysisCategory(
                         name = name,
-                        percentage = String.format(
-                            Locale("pt", "BR"),
-                            "%.1f%%",
-                            percentage
-                        ),
+                        percentage = percentage,
                         value = formatAnalysisCurrency(value)
                     )
                 }
@@ -240,32 +239,62 @@ private fun SummaryAnalysisCard(
 @Composable
 private fun AnalysisCategory(
     name: String,
-    percentage: String,
+    percentage: Double,
     value: String
 ) {
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
 
-        Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
 
             Text(
                 text = name,
                 fontWeight = FontWeight.Medium
             )
 
-            Text(
-                text = percentage,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 12.sp
-            )
+            Row {
+
+                Text(
+                    text = String.format(
+                        Locale("pt", "BR"),
+                        "%.1f%%",
+                        percentage
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
+
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                Text(
+                    text = value,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
 
-        Text(
-            text = value,
-            fontWeight = FontWeight.SemiBold
+        Spacer(
+            modifier = Modifier.height(6.dp)
+        )
+
+        LinearProgressIndicator(
+            progress = {
+                (percentage / 100.0)
+                    .coerceIn(0.0, 1.0)
+                    .toFloat()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp),
+            shape = RoundedCornerShape(8.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }
