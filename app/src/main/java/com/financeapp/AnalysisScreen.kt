@@ -9,20 +9,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalysisScreen(
     bottomPadding: PaddingValues,
@@ -184,8 +180,15 @@ fun AnalysisScreen(
 
                     AnalysisCategory(
                         name = name,
-                        percentage = percentage,
-                        value = formatAnalysisCurrency(value)
+                        percentage = String.format(
+                            Locale("pt", "BR"),
+                            "%.1f%%",
+                            percentage
+                        ),
+                        value = formatAnalysisCurrency(value),
+                        progress = (
+                            percentage / 100.0
+                        ).toFloat()
                     )
                 }
             }
@@ -239,8 +242,9 @@ private fun SummaryAnalysisCard(
 @Composable
 private fun AnalysisCategory(
     name: String,
-    percentage: Double,
-    value: String
+    percentage: String,
+    value: String,
+    progress: Float
 ) {
 
     Column(
@@ -252,32 +256,24 @@ private fun AnalysisCategory(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Text(
-                text = name,
-                fontWeight = FontWeight.Medium
-            )
-
-            Row {
+            Column {
 
                 Text(
-                    text = String.format(
-                        Locale("pt", "BR"),
-                        "%.1f%%",
-                        percentage
-                    ),
+                    text = name,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Text(
+                    text = percentage,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp
                 )
-
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
-
-                Text(
-                    text = value,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
+
+            Text(
+                text = value,
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         Spacer(
@@ -285,16 +281,8 @@ private fun AnalysisCategory(
         )
 
         LinearProgressIndicator(
-            progress = {
-                (percentage / 100.0)
-                    .coerceIn(0.0, 1.0)
-                    .toFloat()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp),
-            shape = RoundedCornerShape(8.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
+            progress = progress,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
