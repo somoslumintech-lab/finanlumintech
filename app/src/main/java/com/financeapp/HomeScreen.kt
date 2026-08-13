@@ -50,7 +50,8 @@ import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    bottomPadding: PaddingValues
+    bottomPadding: PaddingValues,
+    onEdit: (Transaction) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -145,6 +146,9 @@ fun HomeScreen(
 
                     TransactionItem(
                         transaction = transaction,
+                        onEdit = {
+                            onEdit(transaction)
+                        },
                         onDelete = {
                             transactionToDelete = transaction
                         }
@@ -545,6 +549,7 @@ private fun EmptyTransactions() {
 @Composable
 private fun TransactionItem(
     transaction: Transaction,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
 
@@ -568,7 +573,7 @@ private fun TransactionItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                onDelete()
+                onEdit()
             }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically

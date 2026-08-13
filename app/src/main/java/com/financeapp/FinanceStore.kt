@@ -69,6 +69,28 @@ object FinanceStore {
         )
     }
 
+    fun updateTransaction(
+        context: Context,
+        transaction: Transaction
+    ) {
+        val transactions = getTransactions(
+            context
+        ).toMutableList()
+
+        val index = transactions.indexOfFirst {
+            it.id == transaction.id
+        }
+
+        if (index != -1) {
+            transactions[index] = transaction
+        }
+
+        saveTransactions(
+            context,
+            transactions
+        )
+    }
+
     fun deleteTransaction(
         context: Context,
         transactionId: Long
