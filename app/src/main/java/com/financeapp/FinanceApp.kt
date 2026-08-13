@@ -123,6 +123,9 @@ fun FinanceApp() {
                         bottomPadding = padding,
                         onEdit = { transaction ->
                             transactionToEdit = transaction
+                        },
+                        onHistory = {
+                            currentScreen = "history"
                         }
                     )
                 }
@@ -150,6 +153,18 @@ fun FinanceApp() {
                         bottomPadding = padding,
                         onBack = {
                             currentScreen = "home"
+                        }
+                    )
+                }
+
+                "history" -> {
+                    HistoryScreen(
+                        bottomPadding = padding,
+                        onBack = {
+                            currentScreen = "home"
+                        },
+                        onEdit = { transaction ->
+                            transactionToEdit = transaction
                         }
                     )
                 }

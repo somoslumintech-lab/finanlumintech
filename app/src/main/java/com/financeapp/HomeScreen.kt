@@ -36,15 +36,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -65,17 +65,33 @@ fun HomeScreen(
         mutableStateOf<Transaction?>(null)
     }
 
+    var showAllCategories by remember {
+        mutableStateOf(false)
+    }
+
+    var showAllTransactions by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(Unit) {
         transactions = FinanceStore.getTransactions(context)
     }
 
     val income = transactions
-        .filter { it.type == TransactionType.INCOME }
-        .sumOf { it.amount }
+        .filter {
+            it.type == TransactionType.INCOME
+        }
+        .sumOf {
+            it.amount
+        }
 
     val expenses = transactions
-        .filter { it.type == TransactionType.EXPENSE }
-        .sumOf { it.amount }
+        .filter {
+            it.type == TransactionType.EXPENSE
+        }
+        .sumOf {
+            it.amount
+        }
 
     val balance = income - expenses
 
@@ -114,20 +130,35 @@ fun HomeScreen(
             item {
                 SectionHeader(
                     title = "Gastos por categoria",
-                    action = "Ver tudo"
+                    action = if (showAllCategories) {
+                        "Mostrar menos"
+                    } else {
+                        "Ver tudo"
+                    },
+                    onAction = {
+                        showAllCategories = !showAllCategories
+                    }
                 )
             }
 
             item {
                 CategoryList(
-                    transactions = transactions
+                    transactions = transactions,
+                    showAll = showAllCategories
                 )
             }
 
             item {
                 SectionHeader(
                     title = "Movimentações recentes",
-                    action = "Ver tudo"
+                    action = if (showAllTransactions) {
+                        "Mostrar menos"
+                    } else {
+                        "Ver tudo"
+                    },
+                    onAction = {
+                        showAllTransactions = !showAllTransactions
+                    }
                 )
             }
 
@@ -139,8 +170,15 @@ fun HomeScreen(
 
             } else {
 
+                val displayedTransactions =
+                    if (showAllTransactions) {
+                        transactions
+                    } else {
+                        transactions.take(10)
+                    }
+
                 items(
-                    items = transactions.take(10),
+                    items = displayedTransactions,
                     key = { it.id }
                 ) { transaction ->
 
@@ -381,7 +419,8 @@ private fun SummaryCard(
 @Composable
 private fun SectionHeader(
     title: String,
-    action: String
+    action: String,
+    onAction: () -> Unit = {}
 ) {
 
     Row(
@@ -400,14 +439,18 @@ private fun SectionHeader(
             text = action,
             color = MaterialTheme.colorScheme.primary,
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.clickable {
+                onAction()
+            }
         )
     }
 }
 
 @Composable
 private fun CategoryList(
-    transactions: List<Transaction>
+    transactions: List<Transaction>,
+    showAll: Boolean
 ) {
 
     val expenses = transactions.filter {
@@ -425,22 +468,35 @@ private fun CategoryList(
     }
 
     val categories = expenses
-        .groupBy { it.category }
+        .groupBy {
+            it.category
+        }
         .mapValues { (_, items) ->
-            items.sumOf { it.amount }
+            items.sumOf {
+                it.amount
+            }
         }
         .toList()
-        .sortedByDescending { it.second }
+        .sortedByDescending {
+            it.second
+        }
 
     val total = expenses.sumOf {
         it.amount
     }
 
+    val displayedCategories =
+        if (showAll) {
+            categories
+        } else {
+            categories.take(5)
+        }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
 
-        categories.take(5).forEach { (name, value) ->
+        displayedCategories.forEach { (name, value) ->
 
             val progress =
                 if (total > 0) {
