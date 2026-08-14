@@ -1,5 +1,7 @@
 package com.financeapp
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -19,10 +22,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -134,26 +135,28 @@ fun AddTransactionScreen(
                                 it == '.'
                         }
 
-                    val separatorIndex = filteredValue.indexOfFirst {
-                        it == ',' || it == '.'
-                    }
+                    val separatorIndex =
+                        filteredValue.indexOfFirst {
+                            it == ',' || it == '.'
+                        }
 
                     val normalizedValue =
                         if (separatorIndex >= 0) {
 
                             val integerPart =
-                                filteredValue
-                                    .substring(
-                                        0,
-                                        separatorIndex
-                                    )
+                                filteredValue.substring(
+                                    0,
+                                    separatorIndex
+                                )
 
                             val decimalPart =
                                 filteredValue
                                     .substring(
                                         separatorIndex + 1
                                     )
-                                    .filter { it.isDigit() }
+                                    .filter {
+                                        it.isDigit()
+                                    }
                                     .take(2)
 
                             integerPart +
@@ -181,33 +184,33 @@ fun AddTransactionScreen(
             )
 
             Text(
-    text = "Tipo",
-    fontWeight = FontWeight.Medium
-)
+                text = "Tipo",
+                fontWeight = FontWeight.Medium
+            )
 
-Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(12.dp)
-) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
 
-    TypeButton(
-        text = "Saída",
-        selected = !isIncome,
-        onClick = {
-            isIncome = false
-        },
-        modifier = Modifier.weight(1f)
-    )
+                TypeButton(
+                    text = "Saída",
+                    selected = !isIncome,
+                    onClick = {
+                        isIncome = false
+                    },
+                    modifier = Modifier.weight(1f)
+                )
 
-    TypeButton(
-        text = "Entrada",
-        selected = isIncome,
-        onClick = {
-            isIncome = true
-        },
-        modifier = Modifier.weight(1f)
-    )
-)
+                TypeButton(
+                    text = "Entrada",
+                    selected = isIncome,
+                    onClick = {
+                        isIncome = true
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
             OutlinedTextField(
                 value = description,
@@ -277,8 +280,7 @@ Row(
 
                 Text(
                     text = errorMessage,
-                    color = androidx.compose.material3.MaterialTheme
-                        .colorScheme.error
+                    color = MaterialTheme.colorScheme.error
                 )
             }
 
@@ -347,4 +349,52 @@ Row(
             }
         }
     }
+}
+
+@Composable
+private fun TypeButton(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val borderColor =
+        if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.outline
+        }
+
+    val textColor =
+        if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
+    Text(
+        text = text,
+        color = textColor,
+        fontWeight = if (selected) {
+            FontWeight.Bold
+        } else {
+            FontWeight.Medium
+        },
+        modifier = modifier
+            .border(
+                width = 1.5.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable {
+                onClick()
+            }
+            .padding(
+                vertical = 14.dp
+            )
+            .then(
+                Modifier
+            ),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+    )
 }
