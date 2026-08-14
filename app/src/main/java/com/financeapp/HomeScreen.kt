@@ -46,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -251,6 +253,15 @@ private fun formatCurrency(
             Locale("pt", "BR")
         )
         .format(value)
+}
+
+private fun formatTransactionDate(
+    timestamp: Long
+): String {
+    return SimpleDateFormat(
+        "dd/MM/yyyy • HH:mm",
+        Locale("pt", "BR")
+    ).format(Date(timestamp))
 }
 
 @Composable
@@ -669,6 +680,14 @@ private fun TransactionItem(
                 text = transaction.category,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
+            )
+
+            Text(
+                text = formatTransactionDate(
+                    transaction.date
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp
             )
         }
 
