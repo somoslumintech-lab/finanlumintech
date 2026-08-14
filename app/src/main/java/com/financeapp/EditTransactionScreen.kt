@@ -1,5 +1,7 @@
 package com.financeapp
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,16 +11,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -27,10 +32,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -127,8 +133,48 @@ fun EditTransactionScreen(
 
             OutlinedTextField(
                 value = amount,
-                onValueChange = {
-                    amount = it
+                onValueChange = { newValue ->
+
+                    val filteredValue = newValue
+                        .filter {
+                            it.isDigit() ||
+                                it == ',' ||
+                                it == '.'
+                        }
+
+                    val separatorIndex =
+                        filteredValue.indexOfFirst {
+                            it == ',' || it == '.'
+                        }
+
+                    val normalizedValue =
+                        if (separatorIndex >= 0) {
+
+                            val integerPart =
+                                filteredValue.substring(
+                                    0,
+                                    separatorIndex
+                                )
+
+                            val decimalPart =
+                                filteredValue
+                                    .substring(
+                                        separatorIndex + 1
+                                    )
+                                    .filter {
+                                        it.isDigit()
+                                    }
+                                    .take(2)
+
+                            integerPart +
+                                "," +
+                                decimalPart
+
+                        } else {
+                            filteredValue
+                        }
+
+                    amount = normalizedValue
                     errorMessage = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -138,7 +184,10 @@ fun EditTransactionScreen(
                 placeholder = {
                     Text("R$ 0,00")
                 },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                )
             )
 
             Text(
@@ -147,26 +196,27 @@ fun EditTransactionScreen(
             )
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                RadioButton(
+                EditTypeButton(
+                    text = "Saída",
                     selected = !isIncome,
                     onClick = {
                         isIncome = false
-                    }
+                    },
+                    modifier = Modifier.weight(1f)
                 )
 
-                Text("Saída")
-
-                RadioButton(
+                EditTypeButton(
+                    text = "Entrada",
                     selected = isIncome,
                     onClick = {
                         isIncome = true
-                    }
+                    },
+                    modifier = Modifier.weight(1f)
                 )
-
-                Text("Entrada")
             }
 
             OutlinedTextField(
@@ -185,27 +235,37 @@ fun EditTransactionScreen(
                 singleLine = true
             )
 
-            Column(
+            ExposedDropdownMenuBox(
+                expanded = categoryExpanded,
+                onExpandedChange = {
+                    categoryExpanded = !categoryExpanded
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
 
                 OutlinedTextField(
                     value = category,
                     onValueChange = {},
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
                     label = {
                         Text("Categoria")
                     },
                     readOnly = true,
-                    singleLine = true
+                    singleLine = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(
+                            expanded = categoryExpanded
+                        )
+                    }
                 )
 
-                DropdownMenu(
+                ExposedDropdownMenu(
                     expanded = categoryExpanded,
                     onDismissRequest = {
                         categoryExpanded = false
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 ) {
 
                     categories.forEach { item ->
@@ -221,21 +281,13 @@ fun EditTransactionScreen(
                         )
                     }
                 }
-
-                Button(
-                    onClick = {
-                        categoryExpanded = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Escolher categoria")
-                }
             }
 
             if (errorMessage.isNotEmpty()) {
 
                 Text(
-                    text = errorMessage
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
 
@@ -299,4 +351,49 @@ fun EditTransactionScreen(
             }
         }
     }
+}
+
+@Composable
+private fun EditTypeButton(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val borderColor =
+        if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.outline
+        }
+
+    val textColor =
+        if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
+    Text(
+        text = text,
+        color = textColor,
+        fontWeight = if (selected) {
+            FontWeight.Bold
+        } else {
+            FontWeight.Medium
+        },
+        modifier = modifier
+            .border(
+                width = 1.5.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable {
+                onClick()
+            }
+            .padding(
+                vertical = 14.dp
+            ),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+    )
 }
