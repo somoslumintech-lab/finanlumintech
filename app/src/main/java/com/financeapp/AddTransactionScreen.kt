@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -121,8 +123,46 @@ fun AddTransactionScreen(
 
             OutlinedTextField(
                 value = amount,
-                onValueChange = {
-                    amount = it
+                onValueChange = { newValue ->
+
+                    val filteredValue = newValue
+                        .filter {
+                            it.isDigit() ||
+                                it == ',' ||
+                                it == '.'
+                        }
+
+                    val separatorIndex = filteredValue.indexOfFirst {
+                        it == ',' || it == '.'
+                    }
+
+                    val normalizedValue =
+                        if (separatorIndex >= 0) {
+
+                            val integerPart =
+                                filteredValue
+                                    .substring(
+                                        0,
+                                        separatorIndex
+                                    )
+
+                            val decimalPart =
+                                filteredValue
+                                    .substring(
+                                        separatorIndex + 1
+                                    )
+                                    .filter { it.isDigit() }
+                                    .take(2)
+
+                            integerPart +
+                                "," +
+                                decimalPart
+
+                        } else {
+                            filteredValue
+                        }
+
+                    amount = normalizedValue
                     errorMessage = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -132,7 +172,10 @@ fun AddTransactionScreen(
                 placeholder = {
                     Text("R$ 0,00")
                 },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                )
             )
 
             Text(
@@ -228,8 +271,11 @@ fun AddTransactionScreen(
             }
 
             if (errorMessage.isNotEmpty()) {
+
                 Text(
-                    text = errorMessage
+                    text = errorMessage,
+                    color = androidx.compose.material3.MaterialTheme
+                        .colorScheme.error
                 )
             }
 
@@ -287,6 +333,8 @@ fun AddTransactionScreen(
                             category = "Outros"
                             categoryExpanded = false
                             errorMessage = ""
+
+                            onBack()
                         }
                     }
                 },
