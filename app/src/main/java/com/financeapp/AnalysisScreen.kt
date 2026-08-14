@@ -9,18 +9,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +42,7 @@ fun AnalysisScreen(
     bottomPadding: PaddingValues,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     var transactions by remember {
         mutableStateOf(
@@ -134,27 +134,34 @@ fun AnalysisScreen(
             )
 
             Text(
-                text = "Dados atuais",
+                text = "Visão geral das suas finanças",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            SummaryAnalysisCard(
-                title = "Entradas",
-                value = formatAnalysisCurrency(income)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
 
-            SummaryAnalysisCard(
-                title = "Saídas",
-                value = formatAnalysisCurrency(expenses)
-            )
+                CompactSummaryCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Entradas",
+                    value = formatAnalysisCurrency(income)
+                )
 
-            SummaryAnalysisCard(
-                title = "Economia",
-                value = formatAnalysisCurrency(savings)
+                CompactSummaryCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Saídas",
+                    value = formatAnalysisCurrency(expenses)
+                )
+            }
+
+            BalanceAnalysisCard(
+                value = savings
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(4.dp)
             )
 
             Text(
@@ -212,15 +219,65 @@ private fun formatAnalysisCurrency(
 }
 
 @Composable
-private fun SummaryAnalysisCard(
+private fun CompactSummaryCard(
+    modifier: Modifier,
     title: String,
     value: String
 ) {
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+            18.dp
+        ),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp)
+        ) {
+
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+            Text(
+                text = value,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun BalanceAnalysisCard(
+    value: Double
+) {
+
+    val isPositive = value >= 0
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+            20.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isPositive) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.errorContainer
+            }
         )
     ) {
 
@@ -228,16 +285,51 @@ private fun SummaryAnalysisCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(18.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column {
+
+                Text(
+                    text = "Saldo",
+                    color = if (isPositive) {
+                        MaterialTheme.colorScheme.onPrimary.copy(
+                            alpha = 0.75f
+                        )
+                    } else {
+                        MaterialTheme.colorScheme.onErrorContainer
+                    },
+                    fontSize = 13.sp
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = if (isPositive) {
+                        "Você está no positivo"
+                    } else {
+                        "Você está no negativo"
+                    },
+                    color = if (isPositive) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onErrorContainer
+                    },
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
             Text(
-                text = value,
+                text = formatAnalysisCurrency(value),
+                color = if (isPositive) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onErrorContainer
+                },
+                fontSize = 19.sp,
                 fontWeight = FontWeight.Bold
             )
         }
