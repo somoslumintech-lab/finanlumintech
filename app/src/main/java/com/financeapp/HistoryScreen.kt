@@ -39,11 +39,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +72,7 @@ fun HistoryScreen(
     }
 
     val sortedTransactions = transactions
-        .sortedByDescending { it.id }
+        .sortedByDescending { it.date }
 
     Scaffold(
         topBar = {
@@ -208,6 +210,17 @@ private fun formatHistoryCurrency(
         .format(value)
 }
 
+private fun formatHistoryDate(
+    timestamp: Long
+): String {
+    return SimpleDateFormat(
+        "dd/MM/yyyy",
+        Locale("pt", "BR")
+    ).format(
+        Date(timestamp)
+    )
+}
+
 @Composable
 private fun HistoryTransactionItem(
     transaction: Transaction,
@@ -272,8 +285,7 @@ private fun HistoryTransactionItem(
             )
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
 
                 Text(
@@ -289,6 +301,16 @@ private fun HistoryTransactionItem(
                     text = transaction.category,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp
+                )
+
+                Spacer(
+                    modifier = Modifier.height(2.dp)
+                )
+
+                Text(
+                    text = formatHistoryDate(transaction.date),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 11.sp
                 )
             }
 
