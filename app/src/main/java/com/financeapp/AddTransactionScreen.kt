@@ -20,7 +20,9 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -179,32 +181,33 @@ fun AddTransactionScreen(
             )
 
             Text(
-                text = "Tipo",
-                fontWeight = FontWeight.Medium
-            )
+    text = "Tipo",
+    fontWeight = FontWeight.Medium
+)
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(12.dp)
+) {
 
-                RadioButton(
-                    selected = !isIncome,
-                    onClick = {
-                        isIncome = false
-                    }
-                )
+    TypeButton(
+        text = "Saída",
+        selected = !isIncome,
+        onClick = {
+            isIncome = false
+        },
+        modifier = Modifier.weight(1f)
+    )
 
-                Text("Saída")
-
-                RadioButton(
-                    selected = isIncome,
-                    onClick = {
-                        isIncome = true
-                    }
-                )
-
-                Text("Entrada")
-            }
+    TypeButton(
+        text = "Entrada",
+        selected = isIncome,
+        onClick = {
+            isIncome = true
+        },
+        modifier = Modifier.weight(1f)
+    )
+)
 
             OutlinedTextField(
                 value = description,
